@@ -11,13 +11,13 @@ public class DatabaseConnection {
     private Connection connection;
 
     private DatabaseConnection() throws SQLException {
-            String url = "jdbc:sqlite:library.db";
+            String url = "jdbc:sqlite:auca_library_db.db";
         try {
             // Load the SQLite JDBC driver (you might need to add it to your dependencies)
             Class.forName("org.sqlite.JDBC");
 
             // Check if the database file exists
-            File dbFile = new File("library.db");
+            File dbFile = new File("auca_library_db.db");
             boolean dbExists = dbFile.exists();
 
             // Establish the database connection
