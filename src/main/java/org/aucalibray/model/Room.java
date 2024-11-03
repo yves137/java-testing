@@ -14,6 +14,11 @@ public class Room {
         this.roomId = UUID.randomUUID();
     }
 
+    public Room(UUID roomId,String roomCode) {
+        this.roomCode = roomCode;
+        this.roomId = roomId;
+    }
+
     public String getRoomCode() {
         return roomCode;
     }

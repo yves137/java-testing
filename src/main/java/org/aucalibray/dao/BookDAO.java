@@ -8,9 +8,11 @@ import java.sql.SQLException;
 
 public class BookDAO {
     public DatabaseConnection dbConnection;
+    public ShelfDAO shelfDAO;
     public BookDAO() {
         try {
             this.dbConnection = DatabaseConnection.getInstance();
+            this.shelfDAO = new ShelfDAO();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -19,6 +21,10 @@ public class BookDAO {
     public void createBook(Book book){
         String insertBookSQL = "INSERT INTO Book (book_id,Book_status,edition,ISBNCode,publication_year,publisher_name,title,shelf_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
+            boolean isAddedToShelf=shelfDAO.increaseStockAvailable(book.getShelfId(), 1);
+            if(!isAddedToShelf){
+                throw new RuntimeException("The book is not added to the shelf");
+            }
             Connection connection = dbConnection.getConnection();
             var preparedStatement = connection.prepareStatement(insertBookSQL);
             preparedStatement.setObject(1, book.getBookId());

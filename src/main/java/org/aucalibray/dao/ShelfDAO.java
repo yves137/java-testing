@@ -4,6 +4,7 @@ import org.aucalibray.model.Shelf;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class ShelfDAO {
     public DatabaseConnection dbConnection;
@@ -27,6 +28,36 @@ public class ShelfDAO {
             preparedStatement.setInt(5, shelf.getInitialStock());
             preparedStatement.setObject(6, shelf.getRoomId());
             preparedStatement.executeUpdate();
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean increaseStockAvailable(UUID shelfId, int stock){
+        String updateStockSQL = "UPDATE Shelf SET available_stock = available_stock + ? WHERE shelf_id = ?";
+        try {
+            Connection connection = dbConnection.getConnection();
+            var preparedStatement = connection.prepareStatement(updateStockSQL);
+            preparedStatement.setInt(1, stock);
+            preparedStatement.setObject(2, shelfId);
+            preparedStatement.executeUpdate();
+            return true;
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int calculateAvailableStockByRoomId(UUID roomId){
+        String selectStockSQL = "SELECT SUM(available_stock) FROM Shelf WHERE room_id = ?";
+        try {
+            Connection connection = dbConnection.getConnection();
+            var preparedStatement = connection.prepareStatement(selectStockSQL);
+            preparedStatement.setObject(1, roomId);
+            var resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                return resultSet.getInt(1);
+            }
+            return 0;
         }catch (Exception e){
             throw new RuntimeException(e);
         }
