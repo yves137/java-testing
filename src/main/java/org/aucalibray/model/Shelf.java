@@ -8,6 +8,7 @@ public class Shelf {
     private int borrowedNumber;
     private int initialStock;
     private UUID roomId;
+    private UUID shelfId;
 
     public Shelf() {
     }
@@ -18,6 +19,24 @@ public class Shelf {
         this.borrowedNumber = borrowedNumber;
         this.initialStock = initialStock;
         this.roomId = roomId;
+        this.shelfId = UUID.randomUUID();
+    }
+
+    public Shelf(UUID shelfId,int availableStock, String bookCategory, int borrowedNumber, int initialStock, UUID roomId) {
+        this.availableStock = availableStock;
+        this.bookCategory = bookCategory;
+        this.borrowedNumber = borrowedNumber;
+        this.initialStock = initialStock;
+        this.roomId = roomId;
+        this.shelfId = shelfId;
+    }
+
+    public UUID getShelfId() {
+        return shelfId;
+    }
+
+    public void setShelfId(UUID shelfId) {
+        this.shelfId = shelfId;
     }
 
     public int getAvailableStock() {

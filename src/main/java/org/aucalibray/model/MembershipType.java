@@ -57,5 +57,21 @@ public class MembershipType {
     public UUID getMembershipTypeId() {
         return membershipTypeId;
     }
+
+    public void setMembershipName(MembershipLevel membershipName) {
+        this.membershipName = membershipName;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public void setMaxBooks(int maxBooks) {
+        this.maxBooks = maxBooks;
+    }
+
+    public void setMembershipTypeId(UUID membershipTypeId) {
+        this.membershipTypeId = membershipTypeId;
+    }
 }
 

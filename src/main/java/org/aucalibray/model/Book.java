@@ -17,7 +17,7 @@ public class Book {
     public Book() {
     }
 
-    public Book(BookStatus bookStatus, int edition, String ISBNCode, Date publicationYear, String publisherName, UUID shelfId, String title) {
+    public Book(BookStatus bookStatus, int edition, String ISBNCode, Date publicationYear, String publisherName, String title ,UUID shelfId) {
         this.bookStatus = bookStatus;
         this.edition = edition;
         this.ISBNCode = ISBNCode;
@@ -26,6 +26,17 @@ public class Book {
         this.shelfId = shelfId;
         this.title = title;
         this.bookId = UUID.randomUUID();
+    }
+
+    public Book(UUID bookId,BookStatus bookStatus, int edition, String ISBNCode, Date publicationYear, String publisherName,String title ,UUID shelfId) {
+        this.bookStatus = bookStatus;
+        this.edition = edition;
+        this.ISBNCode = ISBNCode;
+        this.publicationYear = publicationYear;
+        this.publisherName = publisherName;
+        this.shelfId = shelfId;
+        this.title = title;
+        this.bookId = bookId;
     }
 
     public UUID getBookId() {
