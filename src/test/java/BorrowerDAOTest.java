@@ -7,10 +7,7 @@ import org.aucalibray.model.MembershipType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +19,7 @@ public class BorrowerDAOTest {
     private Connection mockConnection;
     private PreparedStatement mockPreparedStatement;
     private MembershipDAO mockMembershipDAO;
+    private ResultSet mockResultSet;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -30,10 +28,12 @@ public class BorrowerDAOTest {
         mockConnection = mock(Connection.class);
         mockPreparedStatement = mock(PreparedStatement.class);
         mockMembershipDAO = mock(MembershipDAO.class);
+        mockResultSet = mock(ResultSet.class);
 
         // Mock the connection and statement setup
         when(mockDbConnection.getConnection()).thenReturn(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
 
         // Initialize BorrowerDAO with mocked DatabaseConnection
         borrowerDAO = new BorrowerDAO();
@@ -139,5 +139,51 @@ public class BorrowerDAOTest {
 
         // Assert: The result should be false, as 3 books exceed the 2-book limit
         assertFalse(failResult, "The validation should fail for borrowing beyond the allowed limit for STRIVER membership");
+    }
+
+    @Test
+    void testCalculateLateChargeFees_LateReturn() throws SQLException {
+        // Setup a late return scenario
+        UUID borrowerId = UUID.randomUUID();
+        Date returnDate = Date.valueOf("2024-09-09"); // Set a past return date
+        int lateChargeFees = 100; // Expected late charge fee
+
+        // Configure the ResultSet to simulate a late return
+        when(mockResultSet.next()).thenReturn(true);
+        when(mockResultSet.getDate("return_date")).thenReturn(returnDate);
+        when(mockResultSet.getInt("late_charge_fees")).thenReturn(lateChargeFees);
+
+        // Call the method
+        int result = borrowerDAO.calculateLateChargeFees(borrowerId);
+
+        // Assert that the late charge fee is correctly returned
+        assertEquals(lateChargeFees, result);
+
+        // Verify that the query was executed
+        verify(mockPreparedStatement, times(1)).setObject(1, borrowerId);
+        verify(mockPreparedStatement, times(1)).executeQuery();
+    }
+
+    @Test
+    void testCalculateLateChargeFees_TimelyReturn() throws SQLException {
+        // Setup a timely return scenario
+        UUID borrowerId = UUID.randomUUID();
+        Date returnDate = new Date(System.currentTimeMillis()+(24*60*60*1000)); // Set return date to today
+        int lateChargeFees = 100; // Late charge fee should not be applied in this case
+
+        // Configure the ResultSet to simulate a timely return
+        when(mockResultSet.next()).thenReturn(true);
+        when(mockResultSet.getDate("return_date")).thenReturn(returnDate);
+        when(mockResultSet.getInt("late_charge_fees")).thenReturn(lateChargeFees);
+
+        // Call the method
+        int result = borrowerDAO.calculateLateChargeFees(borrowerId);
+
+        // Assert that no late charge fee is returned for a timely return
+        assertEquals(0, result);
+
+        // Verify that the query was executed
+        verify(mockPreparedStatement, times(1)).setObject(1, borrowerId);
+        verify(mockPreparedStatement, times(1)).executeQuery();
     }
 }

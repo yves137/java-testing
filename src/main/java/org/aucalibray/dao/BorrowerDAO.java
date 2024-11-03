@@ -5,6 +5,7 @@ import org.aucalibray.model.Borrower;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class BorrowerDAO {
     public DatabaseConnection dbConnection;
@@ -41,5 +42,27 @@ public class BorrowerDAO {
     public boolean validateBorrower(String readerId,int numberOfBooks){
         var readerMembershipType= membershipDAO.getMembershipTypeByReaderId(readerId);
         return readerMembershipType.getMaxBooks() >= numberOfBooks;
+    }
+
+    // the method to return the charge fees for late returns.
+    public int calculateLateChargeFees(UUID id){
+        String borrowSQL = "SELECT return_date,late_charge_fees FROM Borrower WHERE id = ?";
+        try {
+            Connection connection = dbConnection.getConnection();
+            var preparedStatement = connection.prepareStatement(borrowSQL);
+            preparedStatement.setObject(1, id);
+            var resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                Date returnDate = resultSet.getDate("return_date");
+                int lateChargeFees = resultSet.getInt("late_charge_fees");
+                Date currentDate = new Date(System.currentTimeMillis());
+                if(currentDate.after(returnDate)){
+                    return lateChargeFees;
+                }
+            }
+            return 0;
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
     }
 }
