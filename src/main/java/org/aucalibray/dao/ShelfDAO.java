@@ -62,4 +62,19 @@ public class ShelfDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public UUID getRoomWithFewStock(){
+        String selectRoomSQL = "SELECT room_id FROM Shelf GROUP BY room_id ORDER BY SUM(available_stock) ASC LIMIT 1";
+        try {
+            Connection connection = dbConnection.getConnection();
+            var preparedStatement = connection.prepareStatement(selectRoomSQL);
+            var resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                return UUID.fromString(resultSet.getObject(1).toString()) ;
+            }
+            return null;
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 }

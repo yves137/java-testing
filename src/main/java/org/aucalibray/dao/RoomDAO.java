@@ -34,4 +34,28 @@ public class RoomDAO {
     public int totalNumberBooksInRoom(UUID roomId){
         return shelfDAO.calculateAvailableStockByRoomId(roomId);
     }
+
+    public Room getRoomById(UUID roomId){
+        String selectRoomSQL = "SELECT * FROM Room WHERE room_id = ?";
+        try {
+            Connection connection = dbConnection.getConnection();
+            var preparedStatement = connection.prepareStatement(selectRoomSQL);
+            preparedStatement.setObject(1, roomId);
+            var resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                return new Room(UUID.fromString(resultSet.getString("room_id")), resultSet.getString("room_code"));
+            }
+            return null;
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Room getRoomWithFewestBook(){
+        var roomId= shelfDAO.getRoomWithFewStock();
+        if(roomId==null){
+            return null;
+        }
+        return getRoomById(roomId);
+    }
 }
