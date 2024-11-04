@@ -1,10 +1,12 @@
 package org.aucalibray.dao;
 
+import org.aucalibray.aucaenum.BookStatus;
 import org.aucalibray.model.Book;
 
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class BookDAO {
     public DatabaseConnection dbConnection;
@@ -39,5 +41,35 @@ public class BookDAO {
         }catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    public Book getBookById(UUID bookId){
+        String selectBookSQL = "SELECT * FROM Book WHERE book_id = ?";
+        try {
+            Connection connection = dbConnection.getConnection();
+            var preparedStatement = connection.prepareStatement(selectBookSQL);
+            preparedStatement.setObject(1, bookId);
+            var resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                return new Book(
+                        UUID.fromString(resultSet.getObject("book_id", UUID.class).toString()),
+                        BookStatus.valueOf(resultSet.getString("Book_status")),
+                        resultSet.getInt("edition"),
+                        resultSet.getString("ISBNCode"),
+                        new java.util.Date(resultSet.getDate("publication_year").getTime()),
+                        resultSet.getString("publisher_name"),
+                        resultSet.getString("title"),
+                        UUID.fromString(resultSet.getObject("shelf_id", UUID.class).toString())
+                );
+            }
+            return null;
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean removeBookFromShelf(UUID bookId){
+        Book book = getBookById(bookId);
+        return shelfDAO.removeStock(book.getShelfId(), 1);
     }
 }

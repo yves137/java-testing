@@ -1,4 +1,5 @@
 import org.aucalibray.aucaenum.MembershipLevel;
+import org.aucalibray.dao.BookDAO;
 import org.aucalibray.dao.DatabaseConnection;
 import org.aucalibray.dao.BorrowerDAO;
 import org.aucalibray.dao.MembershipDAO;
@@ -20,6 +21,7 @@ public class BorrowerDAOTest {
     private PreparedStatement mockPreparedStatement;
     private MembershipDAO mockMembershipDAO;
     private ResultSet mockResultSet;
+    private BookDAO mockBookDAO;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -29,6 +31,7 @@ public class BorrowerDAOTest {
         mockPreparedStatement = mock(PreparedStatement.class);
         mockMembershipDAO = mock(MembershipDAO.class);
         mockResultSet = mock(ResultSet.class);
+        mockBookDAO = mock(BookDAO.class);
 
         // Mock the connection and statement setup
         when(mockDbConnection.getConnection()).thenReturn(mockConnection);
@@ -39,6 +42,7 @@ public class BorrowerDAOTest {
         borrowerDAO = new BorrowerDAO();
         borrowerDAO.dbConnection = mockDbConnection;
         borrowerDAO.membershipDAO= mockMembershipDAO;
+        borrowerDAO.bookDAO= mockBookDAO;
     }
 
     @Test
@@ -54,6 +58,8 @@ public class BorrowerDAOTest {
                 "Reader-01",               // Reader ID
                 new java.util.Date()       // Return Date
         );
+        // Stub the method to return true
+        when(mockBookDAO.removeBookFromShelf(borrower.getBookId())).thenReturn(true);
 
         // Call the borrowerBook method
         borrowerDAO.borrowerBook(borrower);

@@ -77,4 +77,18 @@ public class ShelfDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public boolean removeStock(UUID shelfId, int stock){
+        String updateStockSQL = "UPDATE Shelf SET available_stock = available_stock - ? WHERE shelf_id = ?";
+        try{
+            Connection connection = dbConnection.getConnection();
+            var preparedStatement = connection.prepareStatement(updateStockSQL);
+            preparedStatement.setInt(1, stock);
+            preparedStatement.setObject(2, shelfId);
+            preparedStatement.executeUpdate();
+            return true;
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 }

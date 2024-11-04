@@ -10,10 +10,12 @@ import java.util.UUID;
 public class BorrowerDAO {
     public DatabaseConnection dbConnection;
     public MembershipDAO membershipDAO;
+    public BookDAO bookDAO;
     public BorrowerDAO() {
         try {
             this.dbConnection = DatabaseConnection.getInstance();
             this.membershipDAO = new MembershipDAO();
+            this.bookDAO = new BookDAO();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -22,6 +24,10 @@ public class BorrowerDAO {
     public void borrowerBook(Borrower borrower){
         String insertBorrowerSQL = "INSERT INTO Borrower (id,book_id,due_date,fine,late_charge_fees,pickup_date,reader_id,return_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
+            boolean isBorrowed = bookDAO.removeBookFromShelf(borrower.getBookId());
+            if(!isBorrowed){
+                throw new RuntimeException("The book is not borrowed");
+            }
             Connection connection = dbConnection.getConnection();
             var preparedStatement = connection.prepareStatement(insertBorrowerSQL);
             preparedStatement.setObject(1, borrower.getId());
